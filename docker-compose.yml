@@ -1,0 +1,8 @@
+﻿services:
+  canyoubelieveitguyswebfishing:
+    image: canyoubelieveitguyswebfishing
+    build:
+      context: .
+      dockerfile: CanYouBelieveItGuysWebfishing/Dockerfile
+    env_file:
+      - CanYouBelieveItGuysWebfishing/.env
