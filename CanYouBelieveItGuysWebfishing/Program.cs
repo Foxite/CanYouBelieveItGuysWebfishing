@@ -16,7 +16,7 @@ var discord = new DiscordClient(new DiscordConfiguration() {
 
 discord.MessageCreated += async (_, eventArgs) => {
     if (!eventArgs.Author.IsCurrent && regex.IsMatch(eventArgs.Message.Content)) {
-        var webfishing = new DateTime(2024, 10, 12, 1, 0, 0, DateTimeKind.Utc);
+        var webfishing = new DateTime(2024, 10, 11, 19, 0, 0, DateTimeKind.Utc);
         var timeToWebfishing = webfishing - DateTime.UtcNow;
 
         await eventArgs.Message.RespondAsync(string.Format(format, (int) timeToWebfishing.TotalHours, Math.Ceiling(timeToWebfishing.TotalDays)));
