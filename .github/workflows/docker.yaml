@@ -1,0 +1,23 @@
+name: Build and push Docker image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Publish Docker
+      uses: elgohr/Publish-Docker-Github-Action@3.04
+      with:
+        name: canyoubelieveitguyswebfishing
+        context: .
+        dockerfile: CanYouBelieveItGuysWebfishing/Dockerfile
+        registry: ${{ secrets.REPO_URL }}
+        username: ${{ secrets.REPO_USER }}
+        password: ${{ secrets.REPO_PASSWD }}
+        default_branch: master
+        no_push: ${{ github.event_name == 'pull_request' }}
