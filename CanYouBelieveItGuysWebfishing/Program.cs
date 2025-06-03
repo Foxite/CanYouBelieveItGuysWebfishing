@@ -7,7 +7,7 @@ string GetEnv(string key) {
     return Environment.GetEnvironmentVariable(key) ?? throw new Exception($"Missing environment variable {key}");
 }
 
-var format = @"can you believe it guys? {2}! just {0} hours away! {2} is in {0} hours! woohoo! i am so happy about this information! {2} just {1} days away, oh wow! can you believe it? {2}! just in {0} hours! it got here so fast! {2}! just {0} h";
+var format = @"can you believe it guys? {0}! just tomorrow away! {0} is in tomorrow! woohoo! i am so happy about this information! {0} just tomorrow away, oh wow! can you believe it? tomorrow! just in tomorrow! it got here so fast! tomorrow! just t";
 var date = DateTime.ParseExact(GetEnv("DATE"), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 var regex = new Regex(GetEnv("REGEX"), RegexOptions.IgnoreCase);
 var webfishing = GetEnv("WEBFISHING");
@@ -19,10 +19,11 @@ var discord = new DiscordClient(new DiscordConfiguration() {
 });
 
 discord.MessageCreated += async (_, eventArgs) => {
+    Console.WriteLine(eventArgs.Message.Content);
     if (!eventArgs.Author.IsCurrent && regex.IsMatch(eventArgs.Message.Content)) {
         var timeToWebfishing = date - DateTime.UtcNow;
 
-        await eventArgs.Message.RespondAsync(string.Format(format, (int) timeToWebfishing.TotalHours, Environment.GetEnvironmentVariable("JUSTAWEEKAWAY") ?? $"just {Math.Ceiling(timeToWebfishing.TotalDays)} hours away", webfishing));
+        await eventArgs.Message.RespondAsync(string.Format(format, webfishing));
     }
 };
 
