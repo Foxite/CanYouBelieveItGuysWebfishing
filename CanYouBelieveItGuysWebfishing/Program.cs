@@ -22,7 +22,7 @@ discord.MessageCreated += async (_, eventArgs) => {
     if (!eventArgs.Author.IsCurrent && regex.IsMatch(eventArgs.Message.Content)) {
         var timeToWebfishing = date - DateTime.UtcNow;
 
-        await eventArgs.Message.RespondAsync(string.Format(format, (int) timeToWebfishing.TotalHours, Math.Ceiling(timeToWebfishing.TotalDays), webfishing));
+        await eventArgs.Message.RespondAsync(string.Format(format, (int) timeToWebfishing.TotalHours, Environment.GetEnvironmentVariable("JUSTAWEEKAWAY") ?? $"just {Math.Ceiling(timeToWebfishing.TotalDays)} hours away", webfishing));
     }
 };
 

@@ -4,4 +4,4 @@
 **/.idea
 **/*.env
 **/appsettings.json
-
+**/*.DotSettings.user
