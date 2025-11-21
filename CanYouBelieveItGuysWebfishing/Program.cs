@@ -40,7 +40,7 @@ discord.MessageCreated += async (_, eventArgs) => {
 				timeQuantityString = "a";
 			}
 		} else {
-			timeQuantity = (int) (timeToWebfishing.TotalDays / 7);
+			timeQuantity = (int) Math.Round(timeToWebfishing.TotalDays / 7);
 			if (timeQuantity == 0) {
 				timeQuantity = 1;
 			}
