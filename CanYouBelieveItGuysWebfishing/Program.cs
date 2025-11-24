@@ -12,6 +12,8 @@ var date = DateTime.ParseExact(GetEnv("DATE"), "yyyy-MM-dd HH:mm:ss", CultureInf
 var regex = new Regex(GetEnv("REGEX"), RegexOptions.IgnoreCase);
 var webfishing = GetEnv("WEBFISHING");
 
+ulong[] ignoreChannels = (Environment.GetEnvironmentVariable("IGNORE_CHANNELS") ?? "").Split(";").Select(ulong.Parse).ToArray(); 
+
 var discord = new DiscordClient(new DiscordConfiguration() {
 	Token = GetEnv("DISCORD_TOKEN"),
 	TokenType = TokenType.Bot,
@@ -19,48 +21,54 @@ var discord = new DiscordClient(new DiscordConfiguration() {
 });
 
 discord.MessageCreated += async (_, eventArgs) => {
-	if (!eventArgs.Author.IsCurrent && regex.IsMatch(eventArgs.Message.Content)) {
-		TimeSpan timeToWebfishing = date - DateTime.UtcNow;
-
-		int timeQuantity;
-		string? timeQuantityString = null;
-		string timeUnit;
-		if (timeToWebfishing.TotalHours < 24) {
-			timeQuantity = (int) timeToWebfishing.TotalHours;
-			timeUnit = "hour";
-
-			if (timeQuantity == 1) {
-				timeQuantityString = "an";
-			}
-		} else if (timeToWebfishing.TotalDays < 6) { // on purpose, say "a week" if it's 6 days
-			timeQuantity = (int) timeToWebfishing.TotalDays;
-			timeUnit = "day";
-
-			if (timeQuantity == 1) {
-				timeQuantityString = "a";
-			}
-		} else {
-			timeQuantity = (int) Math.Round(timeToWebfishing.TotalDays / 7);
-			if (timeQuantity == 0) {
-				timeQuantity = 1;
-			}
-			timeUnit = "week";
-
-			if (timeQuantity == 1) {
-				timeQuantityString = "a";
-			}
-		}
-
-		if (timeQuantity > 1) {
-			timeUnit += "s";
-		}
-		
-		string timeUnitCutOff = timeUnit[0].ToString();
-
-		timeQuantityString ??= timeQuantity.ToString();
-		
-		await eventArgs.Message.RespondAsync(string.Format(format, webfishing, timeQuantityString, timeUnit, timeUnitCutOff));
+	if (ignoreChannels.Contains(eventArgs.Channel.Id)) {
+		return;
 	}
+
+	if (eventArgs.Author.IsCurrent || !regex.IsMatch(eventArgs.Message.Content)) {
+		return;
+	}
+	
+	TimeSpan timeToWebfishing = date - DateTime.UtcNow;
+
+	int timeQuantity;
+	string? timeQuantityString = null;
+	string timeUnit;
+	if (timeToWebfishing.TotalHours < 24) {
+		timeQuantity = (int) timeToWebfishing.TotalHours;
+		timeUnit = "hour";
+
+		if (timeQuantity == 1) {
+			timeQuantityString = "an";
+		}
+	} else if (timeToWebfishing.TotalDays < 6) { // on purpose, say "a week" if it's 6 days
+		timeQuantity = (int) timeToWebfishing.TotalDays;
+		timeUnit = "day";
+
+		if (timeQuantity == 1) {
+			timeQuantityString = "a";
+		}
+	} else {
+		timeQuantity = (int) Math.Round(timeToWebfishing.TotalDays / 7);
+		if (timeQuantity == 0) {
+			timeQuantity = 1;
+		}
+		timeUnit = "week";
+
+		if (timeQuantity == 1) {
+			timeQuantityString = "a";
+		}
+	}
+
+	if (timeQuantity > 1) {
+		timeUnit += "s";
+	}
+
+	string timeUnitCutOff = timeUnit[0].ToString();
+
+	timeQuantityString ??= timeQuantity.ToString();
+
+	await eventArgs.Message.RespondAsync(string.Format(format, webfishing, timeQuantityString, timeUnit, timeUnitCutOff));
 };
 
 await discord.ConnectAsync();
