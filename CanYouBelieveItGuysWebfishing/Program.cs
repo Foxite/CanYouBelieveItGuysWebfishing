@@ -11,9 +11,13 @@ var format = @"can you believe it guys? {0}! just {1} {2} away! {0} is in {1} {2
 var date = DateTime.ParseExact(GetEnv("DATE"), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 var regex = new Regex(GetEnv("REGEX"), RegexOptions.IgnoreCase);
 var webfishing = GetEnv("WEBFISHING");
+var probability = double.Parse(Environment.GetEnvironmentVariable("PROBABILITY") ?? "1");
+var cooldown = TimeSpan.FromSeconds(int.Parse(Environment.GetEnvironmentVariable("COOLDOWN_SECONDS") ?? "0"));
+ulong[] ignoreChannels = (Environment.GetEnvironmentVariable("IGNORE_CHANNELS") ?? "").Split(";").Select(ulong.Parse).ToArray();
 
-ulong[] ignoreChannels = (Environment.GetEnvironmentVariable("IGNORE_CHANNELS") ?? "").Split(";").Select(ulong.Parse).ToArray(); 
-
+// by channel id
+var lastResponses = new Dictionary<ulong, DateTime>();
+var random = new Random();
 var discord = new DiscordClient(new DiscordConfiguration() {
 	Token = GetEnv("DISCORD_TOKEN"),
 	TokenType = TokenType.Bot,
@@ -28,6 +32,16 @@ discord.MessageCreated += async (_, eventArgs) => {
 	if (eventArgs.Author.IsCurrent || !regex.IsMatch(eventArgs.Message.Content)) {
 		return;
 	}
+
+	if (random.NextDouble() > probability) {
+		return;
+	}
+
+	if (lastResponses.TryGetValue(eventArgs.Channel.Id, out DateTime lastResponse) && (DateTime.UtcNow - lastResponse) < cooldown) {
+		return;
+	}
+
+	lastResponses[eventArgs.Channel.Id] = DateTime.UtcNow;
 	
 	TimeSpan timeToWebfishing = date - DateTime.UtcNow;
 
