@@ -25,6 +25,11 @@ var discord = new DiscordClient(new DiscordConfiguration() {
 });
 
 discord.MessageCreated += async (_, eventArgs) => {
+	TimeSpan timeToWebfishing = date - DateTime.UtcNow;
+	if (timeToWebfishing.TotalSeconds < 0) {
+		return;
+	}
+
 	if (ignoreChannels.Contains(eventArgs.Channel.Id)) {
 		return;
 	}
@@ -43,8 +48,6 @@ discord.MessageCreated += async (_, eventArgs) => {
 
 	lastResponses[eventArgs.Channel.Id] = DateTime.UtcNow;
 	
-	TimeSpan timeToWebfishing = date - DateTime.UtcNow;
-
 	int timeQuantity;
 	string? timeQuantityString = null;
 	string timeUnit;
